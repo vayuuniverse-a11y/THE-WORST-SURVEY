@@ -66,74 +66,114 @@
       background-color: #4338ca;
     }
 
-    #message {
+    .message {
       margin-top: 15px;
       font-size: 15px;
       min-height: 20px;
       color: #ff4d4d;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2>Type your username</h2>
+  <!-- QUESTION 1: USERNAME -->
+  <div class="card" id="q1-card">
+    <h2>Question 1: Type your username</h2>
     <input type="text" id="username-input" placeholder="Enter username...">
-    <button id="submit-btn">Next</button>
-    <div id="message"></div>
+    <button id="q1-btn">Next</button>
+    <div class="message" id="q1-message"></div>
+  </div>
+
+  <!-- QUESTION 2: AGE -->
+  <div class="card hidden" id="q2-card">
+    <h2>Question 2: What is your age?</h2>
+    <input type="number" id="age-input" placeholder="Enter your age...">
+    <button id="q2-btn">Next</button>
+    <div class="message" id="q2-message"></div>
   </div>
 
   <script>
-    const input = document.getElementById("username-input");
-    const submitBtn = document.getElementById("submit-btn");
-    const message = document.getElementById("message");
-
-    // Tracks the first valid username they manage to enter
+    // --- QUESTION 1 LOGIC ---
+    const q1Card = document.getElementById("q1-card");
+    const usernameInput = document.getElementById("username-input");
+    const q1Btn = document.getElementById("q1-btn");
+    const q1Message = document.getElementById("q1-message");
     let firstValidUsername = "";
 
-    submitBtn.addEventListener("click", function() {
-      const name = input.value.trim();
+    // --- QUESTION 2 LOGIC ---
+    const q2Card = document.getElementById("q2-card");
+    const ageInput = document.getElementById("age-input");
+    const q2Btn = document.getElementById("q2-btn");
+    const q2Message = document.getElementById("q2-message");
+    let usedAges = []; // Stores the 5 ages they try so they can't reuse them
 
-      // Check 1: Empty box
+    q1Btn.addEventListener("click", function() {
+      const name = usernameInput.value.trim();
+
       if (name === "") {
-        message.style.color = "#ff4d4d";
-        message.textContent = "You didn't even type anything.";
+        q1Message.textContent = "You didn't even type anything.";
         return;
       }
-
-      // Check 2: Must have a number
       if (!/[0-9]/.test(name)) {
-        message.style.color = "#ff4d4d";
-        message.textContent = "Your username must include a number.";
+        q1Message.textContent = "Your username must include a number.";
         return;
       }
-
-      // Check 3: Must have a capital letter
       if (!/[A-Z]/.test(name)) {
-        message.style.color = "#ff4d4d";
-        message.textContent = "Your username must include a capital letter.";
+        q1Message.textContent = "Your username must include a capital letter.";
         return;
       }
-
-      // Check 4: Must have a symbol
       if (!/[^a-zA-Z0-9]/.test(name)) {
-        message.style.color = "#ff4d4d";
-        message.textContent = "Your username must include a symbol (like !, @, #, $).";
+        q1Message.textContent = "Your username must include a symbol (like !, @, #, $).";
         return;
       }
-
-      // Check 5: "Already taken" troll!
-      // The VERY FIRST time they satisfy all rules, lie and say it's taken.
       if (firstValidUsername === "" || name === firstValidUsername) {
         firstValidUsername = name;
-        message.style.color = "#ff4d4d";
-        message.textContent = `Sorry, "${name}" is already taken by another user. Choose another name.`;
+        q1Message.textContent = `Sorry, "${name}" is already taken by another user. Choose another name.`;
         return;
       }
 
-      // If they change it to a SECOND valid name, let them pass!
-      message.style.color = "#4ade80";
-      message.textContent = `Fine. "${name}" is available. Moving to Question 2...`;
+      // Passed Question 1 -> Switch to Question 2
+      q1Message.style.color = "#4ade80";
+      q1Message.textContent = `Fine. "${name}" is available.`;
+      
+      setTimeout(function() {
+        q1Card.classList.add("hidden");
+        q2Card.classList.remove("hidden");
+      }, 1000);
+    });
+
+    q2Btn.addEventListener("click", function() {
+      const age = ageInput.value.trim();
+
+      if (age === "" || Number(age) <= 0) {
+        q2Message.style.color = "#ff4d4d";
+        q2Message.textContent = "Please enter a real age.";
+        return;
+      }
+
+      // Prevent them from just spamming the exact same number 5 times
+      if (usedAges.includes(age)) {
+        q2Message.style.color = "#ff4d4d";
+        q2Message.textContent = `I already told you age ${age} is taken! Pick a different number.`;
+        return;
+      }
+
+      // Lie for the first 5 unique ages
+      if (usedAges.length < 5) {
+        usedAges.push(age);
+        q2Message.style.color = "#ff4d4d";
+        q2Message.textContent = `Sorry, age ${age} is already taken by another user. Please choose another age.`;
+        ageInput.value = ""; // Clears the box to annoy them even more
+        return;
+      }
+
+      // 6th unique age passes!
+      q2Message.style.color = "#4ade80";
+      q2Message.textContent = `Congrats! Nobody took age ${age} yet. Moving to Question 3...`;
     });
   </script>
 
