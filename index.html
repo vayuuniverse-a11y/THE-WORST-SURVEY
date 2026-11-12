@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nothing to see here</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #secret-btn {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      width: 40px;
+      height: 40px;
+      background-color: white;
+      opacity: 0.1; /* 90% transparent (10% visible) */
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #owner-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #1a1a1a;
+      border: 2px solid #444;
+      padding: 40px 60px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <button id="secret-btn" aria-label="Secret"></button>
+
+  <div id="owner-popup">You the owner!</div>
+
+  <script>
+    let clickCount = 0;
+    const secretBtn = document.getElementById("secret-btn");
+    const ownerPopup = document.getElementById("owner-popup");
+
+    secretBtn.addEventListener("click", function() {
+      clickCount++;
+
+      if (clickCount === 3) {
+        ownerPopup.style.display = "block";
+      }
+    });
+  </script>
+
+</body>
+</html>
