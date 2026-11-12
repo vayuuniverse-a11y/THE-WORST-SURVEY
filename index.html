@@ -3,84 +3,137 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nothing to see here</title>
+  <title>Totally Normal Survey</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background-color: black;
+      background-color: #0d0d0d;
       color: white;
       font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       height: 100vh;
-      overflow: hidden;
+      padding: 20px;
     }
 
-    #secret-btn {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 70px;
-      height: 70px;
-      background-color: transparent;
-      opacity: 0;
-      border: none;
-      cursor: default;
-    }
-
-    #owner-popup {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    .card {
       background-color: #1a1a1a;
-      border: 2px solid #444;
-      padding: 40px 60px;
+      border: 1px solid #333;
+      padding: 30px;
       border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
       text-align: center;
-      font-size: 28px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background-color: #262626;
+      color: white;
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
       font-weight: bold;
-      box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      border: none;
+      background-color: #4f46e5;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:active {
+      background-color: #4338ca;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-size: 15px;
+      min-height: 20px;
+      color: #ff4d4d;
     }
   </style>
 </head>
 <body>
 
-  <button id="secret-btn" aria-label="Secret"></button>
-
-  <div id="owner-popup">You are owner</div>
+  <div class="card">
+    <h2>Type your username</h2>
+    <input type="text" id="username-input" placeholder="Enter username...">
+    <button id="submit-btn">Next</button>
+    <div id="message"></div>
+  </div>
 
   <script>
-    let clickCount = 0;
-    const ownerEmail = "vayuuniverse@gmail.com";
-    const secretBtn = document.getElementById("secret-btn");
-    const ownerPopup = document.getElementById("owner-popup");
+    const input = document.getElementById("username-input");
+    const submitBtn = document.getElementById("submit-btn");
+    const message = document.getElementById("message");
 
-    // 1. Check if this device was already verified before
-    if (localStorage.getItem("verified_owner") === "true") {
-      ownerPopup.style.display = "block";
-    }
+    // Tracks the first valid username they manage to enter
+    let firstValidUsername = "";
 
-    // 2. Invisible 3-tap trigger for first-time verification
-    secretBtn.addEventListener("click", function() {
-      clickCount++;
+    submitBtn.addEventListener("click", function() {
+      const name = input.value.trim();
 
-      if (clickCount === 3) {
-        clickCount = 0; // Reset count in case of typo
-        const enteredEmail = prompt("Enter owner email:");
-
-        if (enteredEmail && enteredEmail.trim().toLowerCase() === ownerEmail) {
-          localStorage.setItem("verified_owner", "true");
-          ownerPopup.style.display = "block";
-        } else if (enteredEmail !== null) {
-          alert("Access denied.");
-        }
+      // Check 1: Empty box
+      if (name === "") {
+        message.style.color = "#ff4d4d";
+        message.textContent = "You didn't even type anything.";
+        return;
       }
+
+      // Check 2: Must have a number
+      if (!/[0-9]/.test(name)) {
+        message.style.color = "#ff4d4d";
+        message.textContent = "Your username must include a number.";
+        return;
+      }
+
+      // Check 3: Must have a capital letter
+      if (!/[A-Z]/.test(name)) {
+        message.style.color = "#ff4d4d";
+        message.textContent = "Your username must include a capital letter.";
+        return;
+      }
+
+      // Check 4: Must have a symbol
+      if (!/[^a-zA-Z0-9]/.test(name)) {
+        message.style.color = "#ff4d4d";
+        message.textContent = "Your username must include a symbol (like !, @, #, $).";
+        return;
+      }
+
+      // Check 5: "Already taken" troll!
+      // The VERY FIRST time they satisfy all rules, lie and say it's taken.
+      if (firstValidUsername === "" || name === firstValidUsername) {
+        firstValidUsername = name;
+        message.style.color = "#ff4d4d";
+        message.textContent = `Sorry, "${name}" is already taken by another user. Choose another name.`;
+        return;
+      }
+
+      // If they change it to a SECOND valid name, let them pass!
+      message.style.color = "#4ade80";
+      message.textContent = `Fine. "${name}" is available. Moving to Question 2...`;
     });
   </script>
 
