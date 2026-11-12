@@ -9,6 +9,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -21,15 +22,14 @@
 
     #secret-btn {
       position: fixed;
-      top: 15px;
-      right: 15px;
-      width: 40px;
-      height: 40px;
-      background-color: white;
-      opacity: 0.1; /* 90% transparent (10% visible) */
+      top: 0;
+      right: 0;
+      width: 70px;
+      height: 70px;
+      background-color: transparent;
+      opacity: 0;
       border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      cursor: default;
     }
 
     #owner-popup {
@@ -53,18 +53,33 @@
 
   <button id="secret-btn" aria-label="Secret"></button>
 
-  <div id="owner-popup">You the owner!</div>
+  <div id="owner-popup">You are owner</div>
 
   <script>
     let clickCount = 0;
+    const ownerEmail = "vayuuniverse@gmail.com";
     const secretBtn = document.getElementById("secret-btn");
     const ownerPopup = document.getElementById("owner-popup");
 
+    // 1. Check if this device was already verified before
+    if (localStorage.getItem("verified_owner") === "true") {
+      ownerPopup.style.display = "block";
+    }
+
+    // 2. Invisible 3-tap trigger for first-time verification
     secretBtn.addEventListener("click", function() {
       clickCount++;
 
       if (clickCount === 3) {
-        ownerPopup.style.display = "block";
+        clickCount = 0; // Reset count in case of typo
+        const enteredEmail = prompt("Enter owner email:");
+
+        if (enteredEmail && enteredEmail.trim().toLowerCase() === ownerEmail) {
+          localStorage.setItem("verified_owner", "true");
+          ownerPopup.style.display = "block";
+        } else if (enteredEmail !== null) {
+          alert("Access denied.");
+        }
       }
     });
   </script>
