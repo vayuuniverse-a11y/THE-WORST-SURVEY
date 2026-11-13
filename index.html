@@ -1,181 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Totally Normal Survey</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background-color: #0d0d0d;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      padding: 20px;
-    }
-
-    .card {
-      background-color: #1a1a1a;
-      border: 1px solid #333;
-      padding: 30px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-    }
-
-    h2 {
-      margin-bottom: 20px;
-      font-size: 22px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #444;
-      background-color: #262626;
-      color: white;
-      margin-bottom: 15px;
-      outline: none;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 8px;
-      border: none;
-      background-color: #4f46e5;
-      color: white;
-      cursor: pointer;
-    }
-
-    button:active {
-      background-color: #4338ca;
-    }
-
-    .message {
-      margin-top: 15px;
-      font-size: 15px;
-      min-height: 20px;
-      color: #ff4d4d;
-    }
-
-    .hidden {
-      display: none;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Totally Normal Survey</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#0d0d0d;color:#fff;font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;padding:20px;overflow:hidden}
+.card{background:#1a1a1a;border:1px solid #333;padding:30px;border-radius:12px;width:100%;max-width:400px;text-align:center}
+h2{margin-bottom:20px;font-size:22px}
+input{width:100%;padding:12px;font-size:16px;border-radius:8px;border:1px solid #444;background:#262626;color:#fff;margin-bottom:15px;outline:none}
+.btn{width:100%;padding:12px;font-size:16px;font-weight:bold;border-radius:8px;border:none;background:#4f46e5;color:#fff;cursor:pointer}
+.choices{display:flex;flex-direction:column;gap:10px;margin-bottom:15px}
+.c-btn{width:100%;padding:12px;font-size:16px;border-radius:8px;border:1px solid #444;background:#262626;color:#fff;cursor:pointer}
+.c-btn.sel{background:#4f46e5;border-color:#818cf8;font-weight:bold}
+#alarm{display:none;color:#ff1a1a;font-size:20px;font-weight:900;margin-top:15px;animation:blink .25s infinite alternate}
+@keyframes blink{from{opacity:1}to{opacity:.2}}
+.run{position:fixed!important;width:110px!important;z-index:999;background:#ef4444!important}
+.leg{display:none;position:absolute;bottom:-14px;width:6px;height:16px;background:#fff;border-radius:3px}
+.run .leg{display:block}
+.l{left:30px;animation:rl .12s infinite alternate}
+.r{right:30px;animation:rr .12s infinite alternate}
+@keyframes rl{from{transform:rotate(-35deg)}to{transform:rotate(35deg)}}
+@keyframes rr{from{transform:rotate(35deg)}to{transform:rotate(-35deg)}}
+.msg{margin-top:15px;font-size:15px;min-height:20px;color:#ff4d4d}
+.hide{display:none}
+</style>
 </head>
 <body>
 
-  <!-- QUESTION 1: USERNAME -->
-  <div class="card" id="q1-card">
-    <h2>Question 1: Type your username</h2>
-    <input type="text" id="username-input" placeholder="Enter username...">
-    <button id="q1-btn">Next</button>
-    <div class="message" id="q1-message"></div>
+<div class="card" id="q1">
+  <h2>Question 1: Type your username</h2>
+  <input type="text" id="u-in" placeholder="Enter username...">
+  <button class="btn" id="q1-btn">Next</button>
+  <div class="msg" id="q1-msg"></div>
+</div>
+
+<div class="card hide" id="q2">
+  <h2>Question 2: What is your age?</h2>
+  <input type="number" id="a-in" placeholder="Enter your age...">
+  <button class="btn" id="q2-btn">Next</button>
+  <div class="msg" id="q2-msg"></div>
+</div>
+
+<div class="card hide" id="q3">
+  <h2>Question 3: How are you feeling?</h2>
+  <div class="choices">
+    <button class="c-btn">Good</button>
+    <button class="c-btn">Not Good</button>
+    <button class="c-btn">Feel Normal</button>
   </div>
+  <button class="btn" id="q3-btn">Next<span class="leg l"></span><span class="leg r"></span></button>
+  <div id="alarm">🚨 CATCH THE BUTTON TO CONTINUE! 🚨</div>
+  <div class="msg" id="q3-msg"></div>
+</div>
 
-  <!-- QUESTION 2: AGE -->
-  <div class="card hidden" id="q2-card">
-    <h2>Question 2: What is your age?</h2>
-    <input type="number" id="age-input" placeholder="Enter your age...">
-    <button id="q2-btn">Next</button>
-    <div class="message" id="q2-message"></div>
-  </div>
+<script>
+const $=id=>document.getElementById(id);
+let firstU="",ages=[],mood="",run=false,rInt,aInt,ctx;
 
-  <script>
-    // --- QUESTION 1 LOGIC ---
-    const q1Card = document.getElementById("q1-card");
-    const usernameInput = document.getElementById("username-input");
-    const q1Btn = document.getElementById("q1-btn");
-    const q1Message = document.getElementById("q1-message");
-    let firstValidUsername = "";
+$("q1-btn").onclick=()=>{
+  const n=$("u-in").value.trim(),m=$("q1-msg");
+  if(!n)return m.textContent="You didn't even type anything.";
+  if(!/[0-9]/.test(n))return m.textContent="Must include a number.";
+  if(!/[A-Z]/.test(n))return m.textContent="Must include a capital letter.";
+  if(!/[^a-zA-Z0-9]/.test(n))return m.textContent="Must include a symbol (!, @, #).";
+  if(!firstU||n===firstU){firstU=n;return m.textContent=`Sorry, "${n}" is already taken.`;}
+  m.style.color="#4ade80";m.textContent=`Fine. "${n}" is available.`;
+  setTimeout(()=>{$("q1").classList.add("hide");$("q2").classList.remove("hide");},900);
+};
 
-    // --- QUESTION 2 LOGIC ---
-    const q2Card = document.getElementById("q2-card");
-    const ageInput = document.getElementById("age-input");
-    const q2Btn = document.getElementById("q2-btn");
-    const q2Message = document.getElementById("q2-message");
-    let usedAges = []; // Stores the 5 ages they try so they can't reuse them
+$("q2-btn").onclick=()=>{
+  const a=$("a-in").value.trim(),m=$("q2-msg");
+  if(!a||+a<=0)return m.textContent="Enter a real age.";
+  if(ages.includes(a))return m.textContent=`Age ${a} is already taken!`;
+  if(ages.length<5){ages.push(a);$("a-in").value="";return m.textContent=`Age ${a} is already taken. Try another.`;}
+  m.style.color="#4ade80";m.textContent=`Congrats! Age ${a} is free.`;
+  setTimeout(()=>{$("q2").classList.add("hide");$("q3").classList.remove("hide");},900);
+};
 
-    q1Btn.addEventListener("click", function() {
-      const name = usernameInput.value.trim();
+function alarm(on){
+  if(!on){clearInterval(aInt);if(ctx)ctx.close();return;}
+  ctx=new(window.AudioContext||window.webkitAudioContext)();let hi=true;
+  aInt=setInterval(()=>{
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type="sawtooth";o.frequency.value=hi?880:620;g.gain.value=.15;
+    o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.18);hi=!hi;
+  },200);
+}
 
-      if (name === "") {
-        q1Message.textContent = "You didn't even type anything.";
-        return;
-      }
-      if (!/[0-9]/.test(name)) {
-        q1Message.textContent = "Your username must include a number.";
-        return;
-      }
-      if (!/[A-Z]/.test(name)) {
-        q1Message.textContent = "Your username must include a capital letter.";
-        return;
-      }
-      if (!/[^a-zA-Z0-9]/.test(name)) {
-        q1Message.textContent = "Your username must include a symbol (like !, @, #, $).";
-        return;
-      }
-      if (firstValidUsername === "" || name === firstValidUsername) {
-        firstValidUsername = name;
-        q1Message.textContent = `Sorry, "${name}" is already taken by another user. Choose another name.`;
-        return;
-      }
+document.querySelectorAll(".c-btn").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".c-btn").forEach(x=>x.classList.remove("sel"));
+  b.classList.add("sel");mood=b.textContent;
+  if(!run){
+    run=true;$("alarm").style.display="block";$("q3-msg").textContent="";
+    const btn=$("q3-btn");btn.classList.add("run");document.body.appendChild(btn);alarm(true);
+    rInt=setInterval(()=>{
+      btn.style.left=Math.max(10,Math.random()*(innerWidth-120))+"px";
+      btn.style.top=Math.max(10,Math.random()*(innerHeight-60))+"px";
+    },220);
+  }
+});
 
-      // Passed Question 1 -> Switch to Question 2
-      q1Message.style.color = "#4ade80";
-      q1Message.textContent = `Fine. "${name}" is available.`;
-      
-      setTimeout(function() {
-        q1Card.classList.add("hidden");
-        q2Card.classList.remove("hidden");
-      }, 1000);
-    });
-
-    q2Btn.addEventListener("click", function() {
-      const age = ageInput.value.trim();
-
-      if (age === "" || Number(age) <= 0) {
-        q2Message.style.color = "#ff4d4d";
-        q2Message.textContent = "Please enter a real age.";
-        return;
-      }
-
-      // Prevent them from just spamming the exact same number 5 times
-      if (usedAges.includes(age)) {
-        q2Message.style.color = "#ff4d4d";
-        q2Message.textContent = `I already told you age ${age} is taken! Pick a different number.`;
-        return;
-      }
-
-      // Lie for the first 5 unique ages
-      if (usedAges.length < 5) {
-        usedAges.push(age);
-        q2Message.style.color = "#ff4d4d";
-        q2Message.textContent = `Sorry, age ${age} is already taken by another user. Please choose another age.`;
-        ageInput.value = ""; // Clears the box to annoy them even more
-        return;
-      }
-
-      // 6th unique age passes!
-      q2Message.style.color = "#4ade80";
-      q2Message.textContent = `Congrats! Nobody took age ${age} yet. Moving to Question 3...`;
-    });
-  </script>
-
+$("q3-btn").onclick=()=>{
+  if(!mood)return $("q3-msg").textContent="Pick a mood first!";
+  if(run){
+    clearInterval(rInt);alarm(false);run=false;
+    const btn=$("q3-btn");btn.classList.remove("run");btn.style.position="static";
+    $("q3").insertBefore(btn,$("alarm"));$("alarm").style.display="none";
+    $("q3-msg").style.color="#4ade80";$("q3-msg").textContent="HOW DID YOU CATCH THAT?! You pass!";
+  }
+};
+</script>
 </body>
 </html>
